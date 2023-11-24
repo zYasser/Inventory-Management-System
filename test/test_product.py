@@ -16,6 +16,21 @@ def test_get_product():
     assert len(result) != 0
 
 
+def test_get_product_by_id_exist():
+    result = service.get_product_by_id("33")
+    assert result is not None
+    
+def test_get_product_by_id_non_existed():
+    result = service.get_product_by_id("9999999")
+    assert result is  None
+
+
+
+def delete_product():
+    result = service.delete_product(35)
+    assert result is True
+
+
 def test_insert_a_product():
     product1 = BaseProduct(
         product_name="Sample Product",
@@ -29,13 +44,12 @@ def test_insert_a_product():
     )
     result = service.insert_product(product1)
 
-    print(result)
     assert result is not None
 
 
-def test_update_a_product():
+def test_update_a_product_exist():
     product1 = Product(
-        product_id=55,
+        product_id=33,
         product_name="Sample Product",
         description="This is a sample product",
         unit_price=19.99,
@@ -47,5 +61,20 @@ def test_update_a_product():
     )
     result = service.update_product(product1)
 
-    print(result)
     assert result is not None
+def test_update_a_product_non_existed():
+    product1 = Product(
+        product_id=99999,
+        product_name="Sample Product",
+        description="This is a sample product",
+        unit_price=19.99,
+        quantity_in_stock=100,
+        category_id=1,
+        category_name="Electronics",
+        supplier_id=101,
+        supplier_name="ABC Supplier",
+    )
+    result = service.update_product(product1)
+
+    assert result is  None
+

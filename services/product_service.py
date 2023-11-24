@@ -20,6 +20,18 @@ class ProductService:
             list_product.append(Product(*result))
         return list_product
 
+    def get_product_by_id(self, product_id: str):
+        # self.db_connection.row_factory = sqlite3.Row
+        cursor = self.db_connection.cursor()
+
+        result = cursor.execute(
+            "SELECT p.* , c.CategoryName, s.SupplierName from Product p LEFT join Category c  on c.CategoryID=p.CategoryID LEFT JOIN Supplier s on s.SupplierID=p.SupplierID WHERE ProductID=?;",
+            (product_id,),
+        ).fetchone()
+        if result is None:
+            return None
+        return Product(*result)
+
     def insert_product(self, Product: BaseProduct):
         cursor = self.db_connection.cursor()
         result = cursor.execute(
@@ -74,3 +86,28 @@ class ProductService:
         # Close the cursor
         cursor.close()
         return result
+
+    def delete_product(self, product_id) -> bool:
+        """
+        Update an existing product in the Product table based on ProductID.
+        """
+        query = (
+            """
+        DELETE FROM PRODUCT WHERE ProductID=?
+        """,
+        )
+
+        cursor = self.db_connection.cursor()
+        result = cursor.execute(
+            query,
+            (product_id,),
+        )
+
+        # Commit the changes to the database
+        self.db_connection.commit()
+
+        # Close the cursor
+        cursor.close()
+        return True
+
+    d
