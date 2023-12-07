@@ -4,7 +4,7 @@ from models.product import BaseProduct, Product
 
 
 class ProductService:
-    def __init__(self, db_connection: Connection) -> [Product]:
+    def __init__(self, db_connection: Connection) :
         self.db_connection = db_connection
 
     def get_all_products(self):
@@ -15,7 +15,6 @@ class ProductService:
             "SELECT p.* , c.CategoryName, s.SupplierName from Product p LEFT join Category c  on c.CategoryID=p.CategoryID LEFT JOIN Supplier s on s.SupplierID=p.SupplierID;"
         ).fetchall()
         list_product = []
-        print(results)
         for result in results:
             list_product.append(Product(*result))
         return list_product
@@ -109,5 +108,3 @@ class ProductService:
         # Close the cursor
         cursor.close()
         return True
-
-    d
