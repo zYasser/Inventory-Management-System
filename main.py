@@ -1,4 +1,6 @@
 import random
+
+from uri_template import expand
 from database import Database
 from services.admin_service import AdminService
 from services.product_service import ProductService
@@ -9,7 +11,7 @@ from tkinter import W, Widget, ttk
 class main(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.geometry("1200x800")
+        self.geometry("1250x800")
         self.frame_side = None
         self.frame_dashboard = None
         self.treeview = None
@@ -17,12 +19,17 @@ class main(ctk.CTk):
         self.create_widget()
         self.con = Database().get_connection()
         self.product_service = ProductService(db_connection=self.con)
+        self.prev = ""
+        self.curr_idx = 0
+        self.products = []
         self.fetch_product()
         self.mainloop()
 
     def create_widget(self):
         # Create frames
-        self.frame_side = ctk.CTkFrame(self, border_color="red", border_width=3)
+        self.frame_side = ctk.CTkFrame(
+            self,
+        )
         self.frame_dashboard = ctk.CTkFrame(
             self,
         )
@@ -32,7 +39,9 @@ class main(ctk.CTk):
 
         # Grid layout
         self.frame_side.grid(row=0, column=0, sticky="nsew")
-        self.frame_dashboard.grid(row=0, column=1, columnspan=2, sticky="nsew")
+        self.frame_dashboard.grid(
+            row=0, column=1, columnspan=2, sticky="nsew", padx=(15, 0)
+        )
         self.frame_control = ctk.CTkFrame(self.frame_dashboard)
         # Create buttons in the sidebar
         button1 = ctk.CTkButton(self.frame_side, text="Button 1")
@@ -55,35 +64,61 @@ class main(ctk.CTk):
 
     def create_control_widget(self):
         # Add buttons and text entry to the frame
-        frame_btn = ctk.CTkFrame(self.frame_control)
+        frame_btn = ctk.CTkFrame(self.frame_control, fg_color="#383434")
         self.btn_add = ctk.CTkButton(
             frame_btn,
-            text="Button 1",
+            text="Add Product",
         )
-        self.entry = ctk.CTkEntry(self.frame_control)
-        self.entry.pack(fill="x", anchor="center", padx=80, pady=10)
-        
 
+        self.entry = ctk.CTkEntry(self.frame_control)
+        self.entry.pack(fill="x", anchor="center", padx=80, pady=(10, 0), expand=True)
+        frame_btn.pack(side="right", fill="x")
         self.btn_buy = ctk.CTkButton(
             frame_btn,
-            text="Button 2",
+            text="Buy Product",
+        )
+        self.btn_search = ctk.CTkButton(
+            frame_btn,
+            text="Search",
+            command=lambda: self.serach_product(self.entry.get()),
         )
 
         self.btn_sell = ctk.CTkButton(
             frame_btn,
-            text="Button 3",
+            text="Sell Product",
         )
         self.btn_add.grid(row=0, column=0)
         self.btn_buy.grid(row=0, column=1, padx=5, pady=10)
         self.btn_sell.grid(row=0, column=2, padx=5, pady=10)
-
-
-
+        self.btn_search.grid(row=0, column=3, padx=5, pady=10)
 
     def fetch_product(self):
         result = self.product_service.get_all_products()
         for i in result:
+            self.products.append(i[1])
             self.treeview.insert(parent="", index="end", values=i)
+
+    def serach_product(self, prefix: str):
+        print(prefix, self.prev, self.curr_idx , "\n" )
+        if self.prev != "" and self.prev != prefix:
+            self.curr_idx = 0
+        self.prev = prefix
+        if len(prefix) == 0:
+            pass
+
+        for w in range(self.curr_idx, len(self.products)):
+            if self.products[w].lower().startswith((prefix.lower())):
+                print("result")
+                self.curr_idx = w + 1
+                result = self.treeview.get_children()[w]
+
+                self.treeview.selection_set(result)
+                self.treeview.see(result)
+
+                return
+            print(w)
+        self.curr_idx = 0
+        return None
 
     def create_tree_view(self):
         frame_tree = ctk.CTkFrame(self.frame_dashboard)
