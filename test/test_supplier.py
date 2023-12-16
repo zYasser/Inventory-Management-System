@@ -11,7 +11,6 @@ DB_NAME = "inventory.db"
 def test_db_connection():
     connection = sqlite3.connect(DB_NAME)
     yield connection
-    connection.close()
 
 
 def test_add_supplier(test_db_connection):
