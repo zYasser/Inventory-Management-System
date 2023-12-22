@@ -1,4 +1,4 @@
-from util.database import Database
+from utils.database import Database
 
 # Only run it for 1 time, running it more than one time will create redundant data
 

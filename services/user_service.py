@@ -1,6 +1,6 @@
 from sqlite3 import Connection, IntegrityError
 import sqlite3
-from util.database import Database
+from utils.database import Database
 from exceptions.exception import DuplicateEmailError, DuplicatePasswordError
 
 from models.user import User
@@ -109,7 +109,8 @@ SELECT u.* , r.role_name from User u left join Role r on u.role_id=r.role_id whe
             (id,),
         )
         return User(*cursor.fetchone())
-    def login(self ,username , password):
+
+    def login(self, username, password):
         cursor = self.db_connection.cursor()
         cursor.execute(
             """
@@ -117,5 +118,5 @@ SELECT u.* , r.role_name from User u left join Role r on u.role_id=r.role_id whe
 """,
             (username,),
         )
-        return User(*cursor.fetchone())
-
+        result = cursor.fetchone()
+        return User(*result) if result is not None else None

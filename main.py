@@ -1,8 +1,8 @@
-import random
-
 from uri_template import expand
-from util.database import Database
+from models.user import User
+from utils.database import Database
 from utils.center import center_screen_geometry
+from windows.login import LoginPage
 from windows.product_details import ProductDetailsPopup
 from services.product_service import ProductService
 import customtkinter as ctk
@@ -22,20 +22,30 @@ class main(ctk.CTk):
                 window_height=800,
             )
         )
-        self.resizable(False ,False)
+        self.resizable(False, False)
 
         self.frame_side = None
         self.frame_dashboard = None
         self.treeview = None
         self.frame_control = None
         self.create_widget()
-        self.con = Database().get_connection()
-        self.product_service = ProductService(db_connection=self.con)
+        self.product_service = ProductService(db_connection=Database().get_connection())
         self.prev = ""
         self.curr_idx = 0
         self.products = []
+        self.user = User()
+        self.open_login()
         self.fetch_product()
         self.mainloop()
+
+    def open_login(self):
+        self.withdraw()
+        self.login = LoginPage(parent=self)
+        self.login.grab_set()
+
+    def fetch_user(self, login):
+        self.user = login.user
+        print(self.user)
 
     def create_widget(self):
         # Create frames

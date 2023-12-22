@@ -1,6 +1,6 @@
 import pytest
 
-from util.database import Database
+from utils.database import Database
 from models.product import BaseProduct, Product
 from services.product_service import ProductService
 
