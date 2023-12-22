@@ -1,6 +1,6 @@
 import pytest
 
-from database import Database
+from util.database import Database
 from services.admin_service import AdminService
 
 

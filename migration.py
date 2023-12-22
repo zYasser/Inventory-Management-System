@@ -1,4 +1,4 @@
-from database import Database
+from util.database import Database
 
 # Only run it for 1 time, running it more than one time will create redundant data
 
@@ -48,33 +48,31 @@ cursor.execute(
     )
 """
 )
-
-# Create the admin table
-cursor.execute(
-    """
-    CREATE TABLE IF NOT EXISTS admin (
-        admin_id INTEGER PRIMARY KEY,
-        username TEXT NOT NULL,
-        password TEXT NOT NULL,
-        email TEXT,
-        full_name TEXT
-    )
-"""
-)
-
 # Create the user table
 cursor.execute(
     """
     CREATE TABLE IF NOT EXISTS user (
         user_id INTEGER PRIMARY KEY,
-        username TEXT NOT NULL,
+        username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
-        email TEXT,
+        email TEXT UNIQUE,
         full_name TEXT,
-        user_type TEXT
+        role_id INTEGER,  -- This column will be used to connect to the role table
+        FOREIGN KEY (role_id) REFERENCES role(role_id)  -- Establishing a foreign key relationship
     )
 """
 )
+
+# Create the role table
+cursor.execute(
+    """
+    CREATE TABLE IF NOT EXISTS role (
+        role_id INTEGER PRIMARY KEY,
+        role_name TEXT NOT NULL
+    )
+"""
+)
+
 
 cursor.execute(
     "INSERT INTO supplier (supplier_name, contact_person, contact_number, email) VALUES ('SupplierA', 'John Doe', '123-456-7890', 'supplierA@example.com')"
@@ -106,20 +104,38 @@ cursor.execute(
     "INSERT INTO transaction_record (product_id, transaction_type, transaction_date, quantity, total_amount) VALUES (3, 'Purchase', '2023-03-10', 2, 999.98)"
 )
 cursor.execute(
-    "INSERT INTO admin (username, password, email, full_name) VALUES ('admin1', 'adminpassword', 'admin@example.com', 'Admin User')"
+    """
+    INSERT INTO role (role_name) VALUES ('user')
+"""
 )
 
 cursor.execute(
-    "INSERT INTO user (username, password, email, full_name, user_type) VALUES ('user1', 'userpassword', 'user1@example.com', 'Regular User', 'Regular')"
+    """
+    INSERT INTO role (role_name) VALUES ('admin')
+"""
 )
+# Insert users into the user table
 cursor.execute(
-    "INSERT INTO user (username, password, email, full_name, user_type) VALUES ('manager1', 'managerpassword', 'manager@example.com', 'Manager User', 'Manager')"
+    """
+    INSERT INTO user (username, password, email, full_name,  role_id) 
+    VALUES ('user1', 'password1', 'user1@example.com', 'User One',  1)
+"""
 )
+
+cursor.execute(
+    """
+    INSERT INTO user (username, password, email, full_name,  role_id) 
+    VALUES ('user2', 'password2', 'user2@example.com', 'User Two',  1)
+"""
+)
+
+cursor.execute(
+    """
+    INSERT INTO user (username, password, email, full_name,  role_id) 
+    VALUES ('admin1', 'adminpass1', 'admin1@example.com',  'admin', 2)
+"""
+)
+
 
 # Commit changes and close the connection
 conn.commit()
-
-
-
-
-

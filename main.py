@@ -1,17 +1,29 @@
 import random
 
 from uri_template import expand
-from database import Database
-from services.admin_service import AdminService
+from util.database import Database
+from utils.center import center_screen_geometry
+from windows.product_details import ProductDetailsPopup
 from services.product_service import ProductService
 import customtkinter as ctk
 from tkinter import W, Widget, ttk
+import CTkMessagebox as msg
 
 
 class main(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.geometry("1250x800")
+        self.geometry(
+            center_screen_geometry(
+                screen_width=self.winfo_screenwidth(),
+                screen_height=self.winfo_screenheight(),
+                window_width=1250,
+                window_height=800,
+            )
+        )
+        self.resizable(False ,False)
+
         self.frame_side = None
         self.frame_dashboard = None
         self.treeview = None
@@ -99,7 +111,6 @@ class main(ctk.CTk):
             self.treeview.insert(parent="", index="end", values=i)
 
     def serach_product(self, prefix: str):
-        print(prefix, self.prev, self.curr_idx , "\n" )
         if self.prev != "" and self.prev != prefix:
             self.curr_idx = 0
         self.prev = prefix
@@ -108,7 +119,6 @@ class main(ctk.CTk):
 
         for w in range(self.curr_idx, len(self.products)):
             if self.products[w].lower().startswith((prefix.lower())):
-                print("result")
                 self.curr_idx = w + 1
                 result = self.treeview.get_children()[w]
 
@@ -116,9 +126,23 @@ class main(ctk.CTk):
                 self.treeview.see(result)
 
                 return
-            print(w)
+
         self.curr_idx = 0
+        msg.CTkMessagebox(
+            title="Error", message="Coudld Not Find The Product", icon="cancel"
+        )
+
         return None
+
+    def on_treeview_click(self, event):
+        item = self.treeview.selection()[0]
+        product_details = {}
+        for col, val in zip(
+            self.treeview["columns"], self.treeview.item(item, "values")
+        ):
+            product_details[col] = val
+        win2 = ProductDetailsPopup(self, product_details)
+        win2.grab_set()
 
     def create_tree_view(self):
         frame_tree = ctk.CTkFrame(self.frame_dashboard)
@@ -170,6 +194,7 @@ class main(ctk.CTk):
         # Configure weights for resizing
         frame_tree.grid_columnconfigure(0, weight=1)
         frame_tree.grid_rowconfigure(0, weight=1)
+        self.treeview.bind("<Double-Button-1>", self.on_treeview_click)
 
 
 main()
