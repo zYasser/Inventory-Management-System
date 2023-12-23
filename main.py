@@ -10,6 +10,8 @@ import customtkinter as ctk
 from tkinter import W, Widget, ttk
 import CTkMessagebox as msg
 
+from windows.user_form import UserForm
+
 
 class main(ctk.CTk):
     def __init__(self):
@@ -71,8 +73,7 @@ class main(ctk.CTk):
         button2 = ctk.CTkButton(self.frame_side, text="Button 2")
         button3 = ctk.CTkButton(self.frame_side, text="Button 3")
         button4 = ctk.CTkButton(
-            self.frame_side,
-            text="Create User",
+            self.frame_side, text="Create User", command=self.open_create_user
         )
 
         button1.grid(row=0, column=0, pady=50)
@@ -88,8 +89,15 @@ class main(ctk.CTk):
         self.create_tree_view()
         self.create_control_widget()
 
-    def open_form():
-        pass
+    def open_create_user(self):
+        # if self.user.role != "Admin":
+        #     msg.CTkMessagebox(
+        #         title="Error",
+        #         message="You Don't have Permission To Access This Page",
+        #         icon="cancel",
+        #     )
+        #     return
+        UserForm(parent=self).grab_set()
 
     def create_control_widget(self):
         # Add buttons and text entry to the frame
@@ -115,10 +123,47 @@ class main(ctk.CTk):
             frame_btn,
             text="Sell Product",
         )
+        self.btn_delete = ctk.CTkButton(
+            frame_btn, text="Delete Product", command=self.delete_product
+        )
         self.btn_add.grid(row=0, column=0)
         self.btn_buy.grid(row=0, column=1, padx=5, pady=10)
         self.btn_sell.grid(row=0, column=2, padx=5, pady=10)
+        self.btn_delete.grid(row=0, column=4, padx=5, pady=10)
+
         self.btn_search.grid(row=0, column=3, padx=5, pady=10)
+
+    def delete_product(self):
+        if self.user.role != "Admin":
+            msg.CTkMessagebox(
+                title="Error",
+                message="You Don't have Permission To Do This Operation",
+                icon="cancel",
+            )
+            return
+
+        try:
+            item = self.treeview.selection()[0]
+            id = self.treeview.item(item)["values"]
+            # get yes/no answers
+            ask = msg.CTkMessagebox(
+                title="Delete?",
+                message="Are You Sure You Want To Delete This Product",
+                icon="question",
+                option_1="No",
+                option_2="Yes",
+            )
+            response = ask.get()
+            if response == "Yes":
+                self.product_service.delete_product(id[0])
+                self.treeview.delete(item)
+
+        except IndexError as e:
+            msg.CTkMessagebox(
+                title="Error",
+                message="You Should Select Item to Delete",
+                icon="cancel",
+            )
 
     def fetch_product(self):
         result = self.product_service.get_all_products()
@@ -151,9 +196,15 @@ class main(ctk.CTk):
         return None
 
     def open_add_product(self):
-        self.withdraw()
         self.add_product = addProductWindow(parent=self)
         self.add_product.grab_set()
+
+    def update_treeview(self):
+        self.products = []
+        self.treeview.delete(*self.treeview.get_children())
+
+        self.fetch_product()
+        self.treeview.update()
 
     def on_treeview_click(self, event):
         item = self.treeview.selection()[0]
@@ -182,6 +233,7 @@ class main(ctk.CTk):
                 "Supplier",
             ),
             show="headings",
+            selectmode="browse",
         )
         self.treeview.grid(row=0, column=0, sticky="nsew")
 

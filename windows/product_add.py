@@ -14,13 +14,17 @@ import CTkMessagebox as msg
 class addProductWindow(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
-
+        self.parent = parent
         self.title("Inventory Page")
         self.geometry("300x400+700+300")
         self.resizable(0, 0)
         self.protocol("WM_DELETE_WINDOW", self.close_window)
 
         self.createWidgets()
+
+    def close_window(self):
+        self.destroy()
+        self.parent.update_treeview()
 
     def createWidgets(self):
         self.nameLabel = ctk.CTkLabel(self, text="Item Name:", text_color="black")
@@ -130,16 +134,7 @@ class addProductWindow(ctk.CTkToplevel):
             )
             return
 
-        id = ProductService(db_connection=Database().get_connection()).insert_product(p)
-        if quantity > 0:
-            TransactionService(
-                db_connection=Database().get_connection()
-            ).add_transaction(
-                str(id),
-                "buy",
-                quantity=quantity,
-                total_amount=round(float(price * quantity), 4),
-            )
+        ProductService(db_connection=Database().get_connection()).insert_product(p)
         for i in self.entry_widgets:
             i.delete(0, "end")
         msg.CTkMessagebox(

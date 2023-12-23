@@ -31,7 +31,7 @@ cursor.execute(
         transaction_date DATE NOT NULL,
         quantity INTEGER NOT NULL,
         total_amount DECIMAL(10, 2) NOT NULL,
-        FOREIGN KEY (product_id) REFERENCES product(product_id)
+        FOREIGN KEY (product_id) REFERENCES product(product_id) ON DELETE CASCADE
     )
 """
 )
