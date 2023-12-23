@@ -59,7 +59,7 @@ SELECT * FROM product;
                 quantity_in_stock = ?, 
                 category_name = ?, 
                 supplier_name = ?
-            WHERE ProductID = ?
+            WHERE Product_ID = ?
             RETURNING * 
         """
 

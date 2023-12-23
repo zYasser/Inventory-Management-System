@@ -2,6 +2,7 @@ from tkinter import filedialog
 from uri_template import expand
 from migration import create_database
 from models.product import Product
+from models.transaction import Transaction
 from models.user import User
 from utils.database import Database
 from utils.center import center_screen_geometry
@@ -11,9 +12,10 @@ from windows.product_details import ProductDetailsPopup
 from services.product_service import ProductService
 import customtkinter as ctk
 import tkinter as tk
-from tkinter import W, Widget, ttk
+from tkinter import ttk
 import CTkMessagebox as msg
 import pandas as pd
+from windows.transaction import TransactionWin
 from windows.user_form import UserForm
 
 
@@ -21,7 +23,6 @@ class main(ctk.CTk):
     def __init__(self):
         super().__init__()
         create_database()
-        self.geometry("1250x800")
         self.geometry(
             center_screen_geometry(
                 screen_width=self.winfo_screenwidth(),
@@ -60,13 +61,14 @@ class main(ctk.CTk):
                 "create": "Create User",
                 "per": "You Don't Permission To Do this Operation",
                 "excel": "Create Excel File",
+                "search_err": "Search bar is Empty!",
             },
             "ar": {
                 "inbound": "الوارد",
                 "outbound": "الصادر",
-                "add_product": "إضافة منتج",
-                "buy_product": "شراء منتج",
-                "sell_product": "بيع منتج",
+                "add_product": "منتج إضافة",
+                "buy_product": "منتج شراء",
+                "sell_product": "منتج بيع",
                 "search": "بحث",
                 "product_id": "معرّف المنتج",
                 "product_name": "اسم المنتج",
@@ -76,14 +78,15 @@ class main(ctk.CTk):
                 "quantity_in_stock": "الكمية في المخزون",
                 "supplier": "المورد",
                 "delete": "حذف",
-                "err_del": "يرجى اختيار المنتج المراد حذفه ",
-                "del": "هل انت متاكد انك تريد حذف المنتجر؟",
+                "err_del": "يرجى المنتج حذفه اختيار",
+                "del": "منتج المتاكد حذف تريد انك انت هل؟",
                 "err": "خطأ",
                 "Yes": "نعم",
                 "No": "لا",
-                "per": "أنت لا تملك صلايحة الوصول",
-                "create": "أنشاء مستخدم",
-                "excel": "أنشاء ملف Excel",
+                "per": "الوصول صلايحة تملك لا أنت",
+                "create": "مستخدم أنشاء",
+                "excel": "Excel ملف أنشاء",
+                "search_err": "فارغ! البحث شريط",
             },
         }
         self.frame_side = None
@@ -96,7 +99,7 @@ class main(ctk.CTk):
         self.curr_idx = 0
         self.products = []
         self.user = User()
-        # self.open_login()
+        self.open_login()
         self.fetch_product()
         self.mainloop()
 
@@ -120,6 +123,22 @@ class main(ctk.CTk):
         # df.to_excel(filename, index=False)
         # print(f"Data exported to {filename}")
 
+    def open_transaction(self, type):
+        if type == "Inbound":
+            TransactionWin(
+                lan=self.current_lang,
+                transaction=self.lang_dict[self.current_lang][type],
+                parent=self,
+                type="buy",
+            ).grab_set()
+        else:
+            TransactionWin(
+                lan=self.current_lang,
+                transaction=self.lang_dict[self.current_lang][type],
+                parent=self,
+                type="sell",
+            ).grab_set()
+
     def create_widget(self):
         # Create frames
         self.frame_side = ctk.CTkFrame(self)
@@ -137,10 +156,14 @@ class main(ctk.CTk):
 
         # Create buttons in the sidebar
         self.button1 = ctk.CTkButton(
-            self.frame_side, text=self.lang_dict[self.current_lang]["inbound"]
+            self.frame_side,
+            text=self.lang_dict[self.current_lang]["inbound"],
+            command=lambda: self.open_transaction("inbound"),
         )
         self.button2 = ctk.CTkButton(
-            self.frame_side, text=self.lang_dict[self.current_lang]["outbound"]
+            self.frame_side,
+            text=self.lang_dict[self.current_lang]["outbound"],
+            command=lambda: self.open_transaction("outbound"),
         )
         self.button3 = ctk.CTkButton(
             self.frame_side,
@@ -173,13 +196,13 @@ class main(ctk.CTk):
         self.language_combobox.grid(row=4, column=0, pady=20, padx=10, sticky="ew")
 
     def open_create_user(self):
-        # if self.user.role != "Admin":
-        #     msg.CTkMessagebox(
-        #         title=self.lang_dict[self.current_lang]["err_del"],
-        #         message=self.lang_dict[self.current_lang]["per"],
-        #         icon="cancel",
-        #     )
-        #     return
+        if self.user.role != "admin":
+            msg.CTkMessagebox(
+                title=self.lang_dict[self.current_lang]["err_del"],
+                message=self.lang_dict[self.current_lang]["per"],
+                icon="cancel",
+            )
+            return
         UserForm(parent=self, lan=self.language_var.get()).grab_set()
 
     def switch_language(self, *args):
@@ -257,7 +280,7 @@ class main(ctk.CTk):
         self.btn_search.grid(row=0, column=3, padx=5, pady=10)
 
     def delete_product(self):
-        if self.user.role != "Admin":
+        if self.user.role != "admin":
             msg.CTkMessagebox(
                 title=self.lang_dict[self.current_lang]["err_del"],
                 message=self.lang_dict[self.current_lang]["per"],
@@ -295,6 +318,13 @@ class main(ctk.CTk):
             self.treeview.insert(parent="", index="end", values=i)
 
     def serach_product(self, prefix: str):
+        if prefix == "":
+            msg.CTkMessagebox(
+                title=self.lang_dict[self.current_lang]["err"],
+                message=self.lang_dict[self.current_lang]["search_err"],
+                icon="cancel",
+            )
+            return
         if self.prev != "" and self.prev != prefix:
             self.curr_idx = 0
         self.prev = prefix

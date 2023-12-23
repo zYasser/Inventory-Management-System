@@ -70,7 +70,6 @@ def create_database():
 
 
 def create_data(cursor):
-    print("data")
     cursor.execute(
         "INSERT INTO product (product_name, description, unit_price, quantity_in_stock, category_name, supplier_name) VALUES ('Laptop', 'High-performance laptop', 1200.00, 50, 'Electronics', 'Se23')"
     )

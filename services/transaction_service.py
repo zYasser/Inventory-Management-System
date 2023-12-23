@@ -71,7 +71,18 @@ class TransactionService:
     def delete_transaction(self, transaction_id):
         cursor = self.db_connection.cursor()
         cursor.execute(
-            "DELETE FROM transaction_record WHERE TransactionID=?", (transaction_id,)
+            "DELETE FROM transaction_record WHERE Transaction_ID=?", (transaction_id,)
         )
         self.db_connection.commit()
         cursor.close()
+
+    def get_transaction_by_type(self, type):
+        cursor = self.db_connection.cursor()
+        res = cursor.execute(
+            """
+    SELECT p.product_name, t.Transaction_ID, t.Transaction_Type, t.Transaction_Date, t.Quantity, t.Total_Amount FROM transaction_record t Left JOIN Product p on t.product_id=p.product_id WHERE Transaction_Type=?; 
+""",
+            (type,),
+        ).fetchall()
+        cursor.close()
+        return res

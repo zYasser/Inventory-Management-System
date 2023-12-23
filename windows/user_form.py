@@ -47,7 +47,7 @@ class UserForm(ctk.CTkToplevel):
             self.create_widget_en()
         else:
             self.create_widget_ar()
-            self.set_language('ar')
+            self.set_language("ar")
 
     def set_language(self, language):
         # Set the language and update the msg dictionary with translated values
