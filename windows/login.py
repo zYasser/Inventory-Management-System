@@ -22,6 +22,40 @@ class LoginPage(ctk.CTkToplevel):
                 window_height=320,
             )
         )
+        self.lang_dict = {
+            "en": {
+                "welcome": "Welcome to the login page",
+                "username": "Username",
+                "password": "Password",
+                "login": "Login",
+                "signup": "Sign up",
+                "create_account": "Create an account",
+                "new_username": "New Username",
+                "new_password": "New Password",
+                "submit": "Submit",
+                "user_exists": "User already exists!",
+                "login_failed": "Login failed!",
+            },
+            "ar": {
+                "welcome": "مرحبًا بك في صفحة الدخول",
+                "username": "المستخدم اسم",
+                "password": "المرور كلمة",
+                "login": "الدخول تسجيل",
+                "signup": " حساب إنشاء",
+                "create_account": "إنشاء حساب",
+                "new_username": "اسم المستخدم الجديد",
+                "new_password": "كلمة المرور الجديدة",
+                "submit": "إرسال",
+                "user_exists": "المستخدم موجود بالفعل!",
+                "login_failed": "فشل تسجيل الدخول!",
+            },
+        }
+        self.language_var = tk.StringVar()
+        self.language_var.set("English")
+        self.language_var.trace("w", self.switch_language)
+
+        self.current_lang = "en"  # Default language
+
         self.user = None
         self.parent = parent
         self.resizable(0, 0)
@@ -37,24 +71,55 @@ class LoginPage(ctk.CTkToplevel):
 
     def createWidgets(self):
         self.lbl1 = ctk.CTkLabel(
-            self, text="Welcome to the login page", font=("Calibri", 16)
+            self,
+            text=self.lang_dict[self.current_lang]["welcome"],
+            font=("Calibri", 16),
         )
         self.lbl1.pack(pady=(20, 0))
 
-        self.userName = ctk.CTkEntry(self, placeholder_text="Username")
+        self.userName = ctk.CTkEntry(
+            self, placeholder_text=self.lang_dict[self.current_lang]["username"]
+        )
         self.userName.pack(pady=(20, 0))
 
-        self.password = ctk.CTkEntry(self, show="*", placeholder_text="Password")
+        self.password = ctk.CTkEntry(
+            self,
+            show="*",
+            placeholder_text=self.lang_dict[self.current_lang]["password"],
+        )
         self.password.pack(pady=(20, 0))
-        self.password.bind(
-            "<Return>", lambda event: self.login()
-        )  # Bind Enter key for login
+        self.password.bind("<Return>", lambda event: self.login())
 
-        self.btn1 = ctk.CTkButton(self, text="Login", command=self.login)
+        self.btn1 = ctk.CTkButton(
+            self,
+            text=self.lang_dict[self.current_lang]["login"],
+            command=self.login,
+        )
         self.btn1.pack(pady=(20, 0))
 
         self.info_label = ctk.CTkLabel(self, text="")
         self.info_label.pack(pady=(10, 0))
+
+        # ComboBox for lang switching
+        self.language_combobox = ctk.CTkComboBox(
+            self, values=["English", "العربية"], variable=self.language_var
+        )
+        self.language_combobox.pack(pady=(10, 0))
+
+    def switch_language(self, *args):
+        selected_language = self.language_var.get()
+        self.current_lang = "ar" if selected_language == "العربية" else "en"
+        self.update_language()
+
+    def update_language(self):
+        self.lbl1.configure(text=self.lang_dict[self.current_lang]["welcome"])
+        self.userName.configure(
+            placeholder_text=self.lang_dict[self.current_lang]["username"]
+        )
+        self.password.configure(
+            placeholder_text=self.lang_dict[self.current_lang]["password"]
+        )
+        self.btn1.configure(text=self.lang_dict[self.current_lang]["login"])
 
     def login(self):
         username = self.userName.get()

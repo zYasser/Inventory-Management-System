@@ -2,6 +2,8 @@ from sqlite3 import Connection
 
 from models.product import Product
 
+import pandas as pd
+
 
 class ProductService:
     def __init__(self, db_connection: Connection):
@@ -87,3 +89,6 @@ SELECT * FROM product;
         self.db_connection.commit()
         cursor.close()
         return True
+
+    def fetch_all_datafram(self):
+        return pd.read_sql_query("SELECT * FROM Product", self.db_connection)

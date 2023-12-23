@@ -1,4 +1,7 @@
+from tkinter import filedialog
 from uri_template import expand
+from migration import create_database
+from models.product import Product
 from models.user import User
 from utils.database import Database
 from utils.center import center_screen_geometry
@@ -7,15 +10,17 @@ from windows.product_add import addProductWindow
 from windows.product_details import ProductDetailsPopup
 from services.product_service import ProductService
 import customtkinter as ctk
+import tkinter as tk
 from tkinter import W, Widget, ttk
 import CTkMessagebox as msg
-
+import pandas as pd
 from windows.user_form import UserForm
 
 
 class main(ctk.CTk):
     def __init__(self):
         super().__init__()
+        create_database()
         self.geometry("1250x800")
         self.geometry(
             center_screen_geometry(
@@ -26,7 +31,61 @@ class main(ctk.CTk):
             )
         )
         self.resizable(False, False)
+        self.current_lang = "en"
+        self.language_var = tk.StringVar(value="English")
+        self.language_var.trace("w", self.switch_language)
 
+        # Language dictionaries
+        self.lang_dict = {
+            "en": {
+                "inbound": "Inbound",
+                "outbound": "Outbound",
+                "add_product": "Add Product",
+                "buy_product": "Buy Product",
+                "sell_product": "Sell Product",
+                "search": "Search",
+                "product_id": "Product ID",
+                "product_name": "Product Name",
+                "description": "Description",
+                "category": "Category",
+                "price": "Price",
+                "quantity_in_stock": "Quantity In Stock",
+                "supplier": "Supplier",
+                "delete": "Delete",
+                "err_del": "You Should Select Item to Delete",
+                "del": "Are You Sure You Want To Delete This Product",
+                "err": "Error",
+                "Yes": "Yes",
+                "No": "No",
+                "create": "Create User",
+                "per": "You Don't Permission To Do this Operation",
+                "excel": "Create Excel File",
+            },
+            "ar": {
+                "inbound": "الوارد",
+                "outbound": "الصادر",
+                "add_product": "إضافة منتج",
+                "buy_product": "شراء منتج",
+                "sell_product": "بيع منتج",
+                "search": "بحث",
+                "product_id": "معرّف المنتج",
+                "product_name": "اسم المنتج",
+                "description": "الوصف",
+                "category": "الفئة",
+                "price": "السعر",
+                "quantity_in_stock": "الكمية في المخزون",
+                "supplier": "المورد",
+                "delete": "حذف",
+                "err_del": "يرجى اختيار المنتج المراد حذفه ",
+                "del": "هل انت متاكد انك تريد حذف المنتجر؟",
+                "err": "خطأ",
+                "Yes": "نعم",
+                "No": "لا",
+                "per": "أنت لا تملك صلايحة الوصول",
+                "create": "أنشاء مستخدم",
+                "excel": "أنشاء ملف Excel",
+            },
+        }
         self.frame_side = None
         self.frame_dashboard = None
         self.treeview = None
@@ -50,14 +109,21 @@ class main(ctk.CTk):
         self.user = login.user
         print(self.user)
 
+    def export_to_excel(self, filename="products.xlsx"):
+        # Get data from the database
+        df = self.product_service.fetch_all_datafram()
+        print(df)
+        directory_path = filedialog.askdirectory(title="Select a Directory")
+        df.to_excel(directory_path + "/products.xlsx", index=False)
+
+        # # Export the DataFrame to Excel
+        # df.to_excel(filename, index=False)
+        # print(f"Data exported to {filename}")
+
     def create_widget(self):
         # Create frames
-        self.frame_side = ctk.CTkFrame(
-            self,
-        )
-        self.frame_dashboard = ctk.CTkFrame(
-            self,
-        )
+        self.frame_side = ctk.CTkFrame(self)
+        self.frame_dashboard = ctk.CTkFrame(self)
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=10)
         self.grid_rowconfigure(0, weight=1)
@@ -68,18 +134,29 @@ class main(ctk.CTk):
             row=0, column=1, columnspan=2, sticky="nsew", padx=(15, 0)
         )
         self.frame_control = ctk.CTkFrame(self.frame_dashboard)
+
         # Create buttons in the sidebar
-        button1 = ctk.CTkButton(self.frame_side, text="Button 1")
-        button2 = ctk.CTkButton(self.frame_side, text="Button 2")
-        button3 = ctk.CTkButton(self.frame_side, text="Button 3")
-        button4 = ctk.CTkButton(
-            self.frame_side, text="Create User", command=self.open_create_user
+        self.button1 = ctk.CTkButton(
+            self.frame_side, text=self.lang_dict[self.current_lang]["inbound"]
+        )
+        self.button2 = ctk.CTkButton(
+            self.frame_side, text=self.lang_dict[self.current_lang]["outbound"]
+        )
+        self.button3 = ctk.CTkButton(
+            self.frame_side,
+            text=self.lang_dict[self.current_lang]["excel"],
+            command=self.export_to_excel,
+        )
+        self.button4 = ctk.CTkButton(
+            self.frame_side,
+            text=self.lang_dict[self.current_lang]["create"],
+            command=self.open_create_user,
         )
 
-        button1.grid(row=0, column=0, pady=50)
-        button2.grid(row=1, column=0, pady=50)
-        button3.grid(row=2, column=0, pady=50)
-        button4.grid(row=3, column=0, pady=50)
+        self.button1.grid(row=0, column=0, pady=50)
+        self.button2.grid(row=1, column=0, pady=50)
+        self.button3.grid(row=2, column=0, pady=50)
+        self.button4.grid(row=3, column=0, pady=50)
         self.frame_side.grid_columnconfigure(0, weight=1)
         self.frame_dashboard.grid_rowconfigure((0), weight=1)
         self.frame_dashboard.grid_rowconfigure((1), weight=10)
@@ -89,21 +166,65 @@ class main(ctk.CTk):
         self.create_tree_view()
         self.create_control_widget()
 
+        # Here's the combobox
+        self.language_combobox = ctk.CTkComboBox(
+            self.frame_side, values=["English", "العربية"], variable=self.language_var
+        )
+        self.language_combobox.grid(row=4, column=0, pady=20, padx=10, sticky="ew")
+
     def open_create_user(self):
         # if self.user.role != "Admin":
         #     msg.CTkMessagebox(
-        #         title="Error",
-        #         message="You Don't have Permission To Access This Page",
+        #         title=self.lang_dict[self.current_lang]["err_del"],
+        #         message=self.lang_dict[self.current_lang]["per"],
         #         icon="cancel",
         #     )
         #     return
-        UserForm(parent=self).grab_set()
+        UserForm(parent=self, lan=self.language_var.get()).grab_set()
+
+    def switch_language(self, *args):
+        selected_language = self.language_var.get()
+        self.current_lang = "ar" if selected_language == "العربية" else "en"
+        self.update_language()
+
+    def update_language(self):
+        self.button1.configure(text=self.lang_dict[self.current_lang]["inbound"])
+        self.button2.configure(text=self.lang_dict[self.current_lang]["outbound"])
+        self.button3.configure(text=self.lang_dict[self.current_lang]["excel"])
+        self.button4.configure(text=self.lang_dict[self.current_lang]["create"])
+        self.btn_add.configure(text=self.lang_dict[self.current_lang]["add_product"])
+        self.btn_delete.configure(text=self.lang_dict[self.current_lang]["delete"])
+
+        self.btn_buy.configure(text=self.lang_dict[self.current_lang]["buy_product"])
+        self.btn_sell.configure(text=self.lang_dict[self.current_lang]["sell_product"])
+        self.btn_search.configure(text=self.lang_dict[self.current_lang]["search"])
+        self.treeview.heading(
+            "id", text=self.lang_dict[self.current_lang]["product_id"]
+        )
+        self.treeview.heading(
+            "name", text=self.lang_dict[self.current_lang]["product_name"]
+        )
+        self.treeview.heading(
+            "Description", text=self.lang_dict[self.current_lang]["description"]
+        )
+        self.treeview.heading(
+            "Category", text=self.lang_dict[self.current_lang]["category"]
+        )
+        self.treeview.heading("Price", text=self.lang_dict[self.current_lang]["price"])
+        self.treeview.heading(
+            "quantity", text=self.lang_dict[self.current_lang]["quantity_in_stock"]
+        )
+        self.treeview.heading(
+            "Supplier", text=self.lang_dict[self.current_lang]["supplier"]
+        )
 
     def create_control_widget(self):
         # Add buttons and text entry to the frame
         frame_btn = ctk.CTkFrame(self.frame_control, fg_color="#383434")
         self.btn_add = ctk.CTkButton(
-            frame_btn, text="Add Product", command=self.open_add_product
+            frame_btn,
+            text=self.lang_dict[self.current_lang]["add_product"],
+            command=self.open_add_product,
         )
 
         self.entry = ctk.CTkEntry(self.frame_control)
@@ -111,20 +232,22 @@ class main(ctk.CTk):
         frame_btn.pack(side="right", fill="x")
         self.btn_buy = ctk.CTkButton(
             frame_btn,
-            text="Buy Product",
+            text=self.lang_dict[self.current_lang]["buy_product"],
         )
         self.btn_search = ctk.CTkButton(
             frame_btn,
-            text="Search",
+            text=self.lang_dict[self.current_lang]["search"],
             command=lambda: self.serach_product(self.entry.get()),
         )
 
         self.btn_sell = ctk.CTkButton(
             frame_btn,
-            text="Sell Product",
+            text=self.lang_dict[self.current_lang]["sell_product"],
         )
         self.btn_delete = ctk.CTkButton(
-            frame_btn, text="Delete Product", command=self.delete_product
+            frame_btn,
+            text=self.lang_dict[self.current_lang]["delete"],
+            command=self.delete_product,
         )
         self.btn_add.grid(row=0, column=0)
         self.btn_buy.grid(row=0, column=1, padx=5, pady=10)
@@ -136,8 +259,8 @@ class main(ctk.CTk):
     def delete_product(self):
         if self.user.role != "Admin":
             msg.CTkMessagebox(
-                title="Error",
-                message="You Don't have Permission To Do This Operation",
+                title=self.lang_dict[self.current_lang]["err_del"],
+                message=self.lang_dict[self.current_lang]["per"],
                 icon="cancel",
             )
             return
@@ -147,21 +270,21 @@ class main(ctk.CTk):
             id = self.treeview.item(item)["values"]
             # get yes/no answers
             ask = msg.CTkMessagebox(
-                title="Delete?",
-                message="Are You Sure You Want To Delete This Product",
+                title=self.lang_dict[self.current_lang]["delete"],
+                message=self.lang_dict[self.current_lang]["del"],
                 icon="question",
-                option_1="No",
-                option_2="Yes",
+                option_1=self.lang_dict[self.current_lang]["No"],
+                option_2=self.lang_dict[self.current_lang]["Yes"],
             )
             response = ask.get()
-            if response == "Yes":
+            if response == "Yes" or response == "لا":
                 self.product_service.delete_product(id[0])
                 self.treeview.delete(item)
 
         except IndexError as e:
             msg.CTkMessagebox(
                 title="Error",
-                message="You Should Select Item to Delete",
+                message=self.lang_dict[self.current_lang]["err_del"],
                 icon="cancel",
             )
 
@@ -213,7 +336,7 @@ class main(ctk.CTk):
             self.treeview["columns"], self.treeview.item(item, "values")
         ):
             product_details[col] = val
-        win2 = ProductDetailsPopup(self, product_details)
+        win2 = ProductDetailsPopup(self, product_details, self.current_lang)
         win2.grab_set()
 
     def create_tree_view(self):
@@ -227,9 +350,9 @@ class main(ctk.CTk):
                 "id",
                 "name",
                 "Description",
-                "Category",
                 "Price",
                 "quantity",
+                "Category",
                 "Supplier",
             ),
             show="headings",
@@ -241,9 +364,9 @@ class main(ctk.CTk):
         self.treeview.heading("id", text="Product ID")
         self.treeview.heading("name", text="Product Name")
         self.treeview.heading("Description", text="Description")
-        self.treeview.heading("Category", text="Category")
-        self.treeview.heading("Price", text="Price")
         self.treeview.heading("quantity", text="Quantity In Stock")
+        self.treeview.heading("Price", text="Price")
+        self.treeview.heading("Category", text="Category")
         self.treeview.heading("Supplier", text="Supplier")
         self.treeview.column("id", width=80)
         self.treeview.column("Price", width=100)
