@@ -3,8 +3,7 @@ class DuplicateEmailError(Exception):
         self.message = message
         super().__init__(self.message)
 
-class DuplicatePasswordError(Exception):
-    def __init__(self, message="Password is not unique."):
+class DuplicateUsernameError(Exception):
+    def __init__(self, message="Username is not unique."):
         self.message = message
         super().__init__(self.message)
-

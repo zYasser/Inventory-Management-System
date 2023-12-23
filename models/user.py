@@ -14,7 +14,7 @@ class User:
         self.password = password
         self.email = email
         self.full_name = full_name
-        self.role_id = role_id  # Corrected line
+        self.role_id = role_id  
         self.role = role
 
     def __str__(self):

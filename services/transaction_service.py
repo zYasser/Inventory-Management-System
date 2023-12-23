@@ -1,28 +1,33 @@
+import datetime
 from sqlite3 import Connection
 from unittest import result
 
 
-class TransicationService:
+class TransactionService:
     def __init__(self, db_connection: Connection):
         self.db_connection = db_connection
 
-    def add_transaction(
-        self, product_id, transaction_type, transaction_date, quantity, total_amount
-    ):
+    def add_transaction(self, product_id, transaction_type, quantity, total_amount):
         cursor = self.db_connection.cursor()
         cursor.execute(
             """
-                INSERT INTO TransactionRecord (ProductID, TransactionType, TransactionDate, Quantity, TotalAmount)
+                INSERT INTO transaction_record (Product_ID, Transaction_Type, Transaction_Date, Quantity, Total_Amount)
                 VALUES (?, ?, ?, ?, ?)
             """,
-            (product_id, transaction_type, transaction_date, quantity, total_amount),
+            (
+                product_id,
+                transaction_type,
+                datetime.datetime.now(),
+                quantity,
+                total_amount,
+            ),
         )
         self.db_connection.commit()
 
     def get_transaction_by_id(self, transaction_id):
         cursor = self.db_connection.cursor()
         cursor.execute(
-            "SELECT * FROM TransactionRecord WHERE TransactionID=?", (transaction_id,)
+            "SELECT * FROM transaction_record WHERE TransactionID=?", (transaction_id,)
         )
         result = cursor.fetchone()
         cursor.close()
@@ -30,7 +35,7 @@ class TransicationService:
 
     def get_all_transactions(self):
         cursor = self.db_connection.cursor()
-        cursor.execute("SELECT * FROM TransactionRecord")
+        cursor.execute("SELECT * FROM transaction_record")
         result = cursor.fetchall()
         cursor.close()
         return result
@@ -47,8 +52,8 @@ class TransicationService:
         cursor = self.db_connection.cursor()
         cursor.execute(
             """
-                UPDATE TransactionRecord
-                SET ProductID=?, TransactionType=?, TransactionDate=?, Quantity=?, TotalAmount=?
+                UPDATE transaction_record
+                SET ProductID=?, Transaction_Type=?, Transaction_Date=?, Quantity=?, Total_Amount=?
                 WHERE TransactionID=?
             """,
             (
@@ -66,7 +71,7 @@ class TransicationService:
     def delete_transaction(self, transaction_id):
         cursor = self.db_connection.cursor()
         cursor.execute(
-            "DELETE FROM TransactionRecord WHERE TransactionID=?", (transaction_id,)
+            "DELETE FROM transaction_record WHERE TransactionID=?", (transaction_id,)
         )
         self.db_connection.commit()
         cursor.close()

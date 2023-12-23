@@ -3,6 +3,7 @@ from models.user import User
 from utils.database import Database
 from utils.center import center_screen_geometry
 from windows.login import LoginPage
+from windows.product_add import addProductWindow
 from windows.product_details import ProductDetailsPopup
 from services.product_service import ProductService
 import customtkinter as ctk
@@ -34,7 +35,7 @@ class main(ctk.CTk):
         self.curr_idx = 0
         self.products = []
         self.user = User()
-        self.open_login()
+        # self.open_login()
         self.fetch_product()
         self.mainloop()
 
@@ -69,7 +70,10 @@ class main(ctk.CTk):
         button1 = ctk.CTkButton(self.frame_side, text="Button 1")
         button2 = ctk.CTkButton(self.frame_side, text="Button 2")
         button3 = ctk.CTkButton(self.frame_side, text="Button 3")
-        button4 = ctk.CTkButton(self.frame_side, text="Button 4")
+        button4 = ctk.CTkButton(
+            self.frame_side,
+            text="Create User",
+        )
 
         button1.grid(row=0, column=0, pady=50)
         button2.grid(row=1, column=0, pady=50)
@@ -84,12 +88,14 @@ class main(ctk.CTk):
         self.create_tree_view()
         self.create_control_widget()
 
+    def open_form():
+        pass
+
     def create_control_widget(self):
         # Add buttons and text entry to the frame
         frame_btn = ctk.CTkFrame(self.frame_control, fg_color="#383434")
         self.btn_add = ctk.CTkButton(
-            frame_btn,
-            text="Add Product",
+            frame_btn, text="Add Product", command=self.open_add_product
         )
 
         self.entry = ctk.CTkEntry(self.frame_control)
@@ -143,6 +149,11 @@ class main(ctk.CTk):
         )
 
         return None
+
+    def open_add_product(self):
+        self.withdraw()
+        self.add_product = addProductWindow(parent=self)
+        self.add_product.grab_set()
 
     def on_treeview_click(self, event):
         item = self.treeview.selection()[0]

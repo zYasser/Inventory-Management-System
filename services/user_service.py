@@ -1,7 +1,10 @@
 from sqlite3 import Connection, IntegrityError
 import sqlite3
 from utils.database import Database
-from exceptions.exception import DuplicateEmailError, DuplicatePasswordError
+from exceptions.exception import (
+    DuplicateEmailError,
+    DuplicateUsernameError,
+)
 
 from models.user import User
 
@@ -32,11 +35,9 @@ class UserService:
         except IntegrityError as e:
             error_message = str(e)
             if "UNIQUE constraint failed: user.username" in error_message:
-                print("Username is not unique.")
+                raise DuplicateUsernameError()
             elif "UNIQUE constraint failed: user.email" in error_message:
                 raise DuplicateEmailError("Email is not unique.")
-            elif "UNIQUE constraint failed: user.password" in error_message:
-                raise DuplicatePasswordError("Password is not unique.")
             else:
                 print(f"Error creating user: {e}")
         finally:

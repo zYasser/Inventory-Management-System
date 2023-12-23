@@ -5,18 +5,6 @@ from utils.database import Database
 conn = Database.get_connection()
 cursor = conn.cursor()
 
-# Create the supplier table
-cursor.execute(
-    """
-    CREATE TABLE IF NOT EXISTS supplier (
-        supplier_id INTEGER PRIMARY KEY,
-        supplier_name TEXT NOT NULL,
-        contact_person TEXT,
-        contact_number TEXT,
-        email TEXT
-    )
-"""
-)
 
 # Create the product table
 cursor.execute(
@@ -28,13 +16,12 @@ cursor.execute(
         unit_price DECIMAL(10, 2) NOT NULL,
         quantity_in_stock INTEGER NOT NULL,
         category_name TEXT,
-        supplier_id INTEGER,
-        FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
+        supplier_name text not null
     )
 """
 )
 
-# Create the transaction_record table
+# Create  ttheransaction_record table
 cursor.execute(
     """
     CREATE TABLE IF NOT EXISTS transaction_record (
@@ -75,23 +62,13 @@ cursor.execute(
 
 
 cursor.execute(
-    "INSERT INTO supplier (supplier_name, contact_person, contact_number, email) VALUES ('SupplierA', 'John Doe', '123-456-7890', 'supplierA@example.com')"
+    "INSERT INTO product (product_name, description, unit_price, quantity_in_stock, category_name, supplier_name) VALUES ('Laptop', 'High-performance laptop', 1200.00, 50, 'Electronics', 'Se23')"
 )
 cursor.execute(
-    "INSERT INTO supplier (supplier_name, contact_person, contact_number, email) VALUES ('SupplierB', 'Jane Smith', '987-654-3210', 'supplierB@example.com')"
+    "INSERT INTO product (product_name, description, unit_price, quantity_in_stock, category_name, supplier_name) VALUES ('T-Shirt', 'Cotton T-Shirt', 15.99, 100, 'Clothing', 'kdwd')"
 )
 cursor.execute(
-    "INSERT INTO supplier (supplier_name, contact_person, contact_number, email) VALUES ('SupplierC', 'Bob Johnson', '111-222-3333', 'supplierC@example.com')"
-)
-
-cursor.execute(
-    "INSERT INTO product (product_name, description, unit_price, quantity_in_stock, category_name, supplier_id) VALUES ('Laptop', 'High-performance laptop', 1200.00, 50, 'Electronics', 1)"
-)
-cursor.execute(
-    "INSERT INTO product (product_name, description, unit_price, quantity_in_stock, category_name, supplier_id) VALUES ('T-Shirt', 'Cotton T-Shirt', 15.99, 100, 'Clothing', 2)"
-)
-cursor.execute(
-    "INSERT INTO product (product_name, description, unit_price, quantity_in_stock, category_name, supplier_id) VALUES ('Sofa', 'Comfortable sofa', 499.99, 20, 'Furniture', 3)"
+    "INSERT INTO product (product_name, description, unit_price, quantity_in_stock, category_name, supplier_name) VALUES ('Sofa', 'Comfortable sofa', 499.99, 20, 'Furniture', 'qkcw')"
 )
 
 cursor.execute(
