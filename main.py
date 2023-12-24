@@ -1,8 +1,5 @@
 from tkinter import filedialog
-from uri_template import expand
 from migration import create_database
-from models.product import Product
-from models.transaction import Transaction
 from models.user import User
 from utils.database import Database
 from utils.center import center_screen_geometry
@@ -15,7 +12,6 @@ import customtkinter as ctk
 import tkinter as tk
 from tkinter import ttk
 import CTkMessagebox as msg
-import pandas as pd
 from windows.sell_win import SellWin
 from windows.transaction import TransactionWin
 from windows.user_form import UserForm

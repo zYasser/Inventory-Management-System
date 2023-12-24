@@ -1,11 +1,8 @@
 import customtkinter as ctk
 import tkinter as tk
-import sqlite3
 
 from models.product import Product
-from models.transaction import Transaction
 from services.product_service import ProductService
-from services.transaction_service import TransactionService
 from utils.database import Database
 
 import CTkMessagebox as msg
