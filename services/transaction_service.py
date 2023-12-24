@@ -7,14 +7,17 @@ class TransactionService:
     def __init__(self, db_connection: Connection):
         self.db_connection = db_connection
 
-    def add_transaction(self, product_id, transaction_type, quantity, total_amount):
+    def add_transaction(
+        self, product_id, transaction_type, quantity, total_amount, customer
+    ):
         cursor = self.db_connection.cursor()
         cursor.execute(
             """
-                INSERT INTO transaction_record (Product_ID, Transaction_Type, Transaction_Date, Quantity, Total_Amount)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO transaction_record (customer,Product_ID, Transaction_Type, Transaction_Date, Quantity, Total_Amount)
+                VALUES (?, ?, ?, ?, ? , ?)
             """,
             (
+                customer,
                 product_id,
                 transaction_type,
                 datetime.datetime.now(),
@@ -80,7 +83,7 @@ class TransactionService:
         cursor = self.db_connection.cursor()
         res = cursor.execute(
             """
-    SELECT p.product_name, t.Transaction_ID, t.Transaction_Type, t.Transaction_Date, t.Quantity, t.Total_Amount FROM transaction_record t Left JOIN Product p on t.product_id=p.product_id WHERE Transaction_Type=?; 
+    SELECT p.product_name, t.Transaction_ID, t.customer, t.Transaction_Type, t.Transaction_Date, t.Quantity, t.Total_Amount FROM transaction_record t Left JOIN Product p on t.product_id=p.product_id WHERE Transaction_Type=?; 
 """,
             (type,),
         ).fetchall()

@@ -18,9 +18,9 @@ class addProductWindow(ctk.CTkToplevel):
         self.title("Inventory Page")
         self.geometry("300x400+700+300")
         self.resizable(0, 0)
+        self.createWidgets()
         self.protocol("WM_DELETE_WINDOW", self.close_window)
 
-        self.createWidgets()
 
     def close_window(self):
         self.destroy()

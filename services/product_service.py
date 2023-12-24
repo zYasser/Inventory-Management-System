@@ -21,11 +21,29 @@ SELECT * FROM product;
         ).fetchall()
         return results
 
+    def change_stock(self, product_id, stock):
+        cursor = self.db_connection.cursor()
+        result = cursor.execute(
+            "UPDATE Product Set quantity_in_stock=quantity_in_stock + ? Where product_id=?",
+            (stock, product_id),
+        )
+
     def get_product_by_id(self, product_id: str):
         cursor = self.db_connection.cursor()
 
         result = cursor.execute(
             "SELECT * FROM Product p  WHERE Product_ID=?;",
+            (product_id,),
+        ).fetchone()
+        if result is None:
+            return None
+        return Product(*result)
+
+    def get_product_stock(self, product_id: str):
+        cursor = self.db_connection.cursor()
+
+        result = cursor.execute(
+            "SELECT p.quantity_in_stock FROM Product p  WHERE Product_ID=?;",
             (product_id,),
         ).fetchone()
         if result is None:

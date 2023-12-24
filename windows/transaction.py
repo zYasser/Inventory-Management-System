@@ -12,17 +12,18 @@ class TransactionWin(ctk.CTkToplevel):
         super().__init__(parent)
         self.transaction = transaction
         self.title(transaction)
-        self.type=type
+        self.type = type
         ctk.CTkLabel(self, text=self.transaction).pack(pady="50", padx="500")
         self.lan = lan
         self.lang_dict = {
             "en": {
-                "Transaction ID": "TransactionID",
+                "Transaction ID": "Transaction ID",
                 "Product Name": "Product Name",
-                "Transaction Type": "TransactionType",
-                "Transaction Date": "TransactionDate",
+                "Transaction Type": "Transaction Type",
+                "Transaction Date": "Transaction Date",
                 "Quantity": "Quantity",
-                "Total Amount": "TotalAmount",
+                "Total Amount": "Total Amount",
+                "Customer": "Customer",
             },
             "ar": {
                 "Transaction ID": "رقم العملية",
@@ -31,6 +32,8 @@ class TransactionWin(ctk.CTkToplevel):
                 "Transaction Date": "تاريخ العملية",
                 "Quantity": "الكمية",
                 "Total Amount": "المبلغ الإجمالي",
+                "Customer": "العميل",
+                
             },
         }
         self.geometry(
@@ -50,13 +53,22 @@ class TransactionWin(ctk.CTkToplevel):
         frame.pack(expand=True, fill="both", padx=50, pady=30)
         self.tree = ttk.Treeview(
             frame,
-            columns=("Product Name", "ID", "Type", "Date", "Quantity", "Amount"),
+            columns=(
+                "Product Name",
+                "ID",
+                "Customer",
+                "Type",
+                "Date",
+                "Quantity",
+                "Amount",
+            ),
             show="headings",
         )
 
         # Define column headings
         self.tree.heading("Product Name", text=self.lang_dict[self.lan]["Product Name"])
         self.tree.heading("ID", text=self.lang_dict[self.lan]["Transaction ID"])
+        self.tree.heading("Customer", text=self.lang_dict[self.lan]["Customer"])
         self.tree.heading("Type", text=self.lang_dict[self.lan]["Transaction Type"])
         self.tree.heading("Date", text=self.lang_dict[self.lan]["Transaction Date"])
         self.tree.heading("Quantity", text=self.lang_dict[self.lan]["Quantity"])
@@ -77,6 +89,7 @@ class TransactionWin(ctk.CTkToplevel):
         )
 
     def fetch(self):
+        print(self.type)
         result = TransactionService(
             Database().get_connection()
         ).get_transaction_by_type(self.type)

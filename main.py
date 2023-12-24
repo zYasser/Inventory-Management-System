@@ -6,6 +6,7 @@ from models.transaction import Transaction
 from models.user import User
 from utils.database import Database
 from utils.center import center_screen_geometry
+from windows.buy_win import BuyWin
 from windows.login import LoginPage
 from windows.product_add import addProductWindow
 from windows.product_details import ProductDetailsPopup
@@ -15,6 +16,7 @@ import tkinter as tk
 from tkinter import ttk
 import CTkMessagebox as msg
 import pandas as pd
+from windows.sell_win import SellWin
 from windows.transaction import TransactionWin
 from windows.user_form import UserForm
 
@@ -53,7 +55,7 @@ class main(ctk.CTk):
                 "quantity_in_stock": "Quantity In Stock",
                 "supplier": "Supplier",
                 "delete": "Delete",
-                "err_del": "You Should Select Item to Delete",
+                "err_del": "You Should Select Item ",
                 "del": "Are You Sure You Want To Delete This Product",
                 "err": "Error",
                 "Yes": "Yes",
@@ -62,6 +64,7 @@ class main(ctk.CTk):
                 "per": "You Don't Permission To Do this Operation",
                 "excel": "Create Excel File",
                 "search_err": "Search bar is Empty!",
+                "Ok": "Ok",
             },
             "ar": {
                 "inbound": "الوارد",
@@ -78,7 +81,7 @@ class main(ctk.CTk):
                 "quantity_in_stock": "الكمية في المخزون",
                 "supplier": "المورد",
                 "delete": "حذف",
-                "err_del": "يرجى المنتج حذفه اختيار",
+                "err_del": "اختيار المنتج يرجى",
                 "del": "منتج المتاكد حذف تريد انك انت هل؟",
                 "err": "خطأ",
                 "Yes": "نعم",
@@ -87,6 +90,7 @@ class main(ctk.CTk):
                 "create": "مستخدم أنشاء",
                 "excel": "Excel ملف أنشاء",
                 "search_err": "فارغ! البحث شريط",
+                "Ok": "حسناً",
             },
         }
         self.frame_side = None
@@ -99,7 +103,7 @@ class main(ctk.CTk):
         self.curr_idx = 0
         self.products = []
         self.user = User()
-        self.open_login()
+        # self.open_login()
         self.fetch_product()
         self.mainloop()
 
@@ -124,7 +128,7 @@ class main(ctk.CTk):
         # print(f"Data exported to {filename}")
 
     def open_transaction(self, type):
-        if type == "Inbound":
+        if type == "inbound":
             TransactionWin(
                 lan=self.current_lang,
                 transaction=self.lang_dict[self.current_lang][type],
@@ -200,6 +204,7 @@ class main(ctk.CTk):
             msg.CTkMessagebox(
                 title=self.lang_dict[self.current_lang]["err_del"],
                 message=self.lang_dict[self.current_lang]["per"],
+                option_1=self.lang_dict[self.current_lang]["Ok"],
                 icon="cancel",
             )
             return
@@ -241,6 +246,35 @@ class main(ctk.CTk):
             "Supplier", text=self.lang_dict[self.current_lang]["supplier"]
         )
 
+    def open_sell(self):
+        try:
+            item = self.treeview.selection()[0]
+            SellWin(
+                self, self.current_lang, self.treeview.item(item, "values")[0]
+            ).grab_set()
+        except IndexError as e:
+            msg.CTkMessagebox(
+                title=self.lang_dict[self.current_lang]["err"],
+                message=self.lang_dict[self.current_lang]["err_del"],
+                icon="cancel",
+                option_1=self.lang_dict[self.current_lang]["Ok"],
+            )
+
+    def open_buy(self):
+        try:
+            item = self.treeview.selection()[0]
+            print()
+            BuyWin(
+                self, self.current_lang, self.treeview.item(item, "values")[0]
+            ).grab_set()
+        except IndexError as e:
+            msg.CTkMessagebox(
+                title=self.lang_dict[self.current_lang]["err"],
+                message=self.lang_dict[self.current_lang]["err_del"],
+                icon="cancel",
+                option_1=self.lang_dict[self.current_lang]["Ok"],
+            )
+
     def create_control_widget(self):
         # Add buttons and text entry to the frame
         frame_btn = ctk.CTkFrame(self.frame_control, fg_color="#383434")
@@ -256,6 +290,7 @@ class main(ctk.CTk):
         self.btn_buy = ctk.CTkButton(
             frame_btn,
             text=self.lang_dict[self.current_lang]["buy_product"],
+            command=self.open_buy,
         )
         self.btn_search = ctk.CTkButton(
             frame_btn,
@@ -266,6 +301,7 @@ class main(ctk.CTk):
         self.btn_sell = ctk.CTkButton(
             frame_btn,
             text=self.lang_dict[self.current_lang]["sell_product"],
+            command=self.open_sell,
         )
         self.btn_delete = ctk.CTkButton(
             frame_btn,
@@ -285,6 +321,7 @@ class main(ctk.CTk):
                 title=self.lang_dict[self.current_lang]["err_del"],
                 message=self.lang_dict[self.current_lang]["per"],
                 icon="cancel",
+                option_1=self.lang_dict[self.current_lang]["Ok"],
             )
             return
 
@@ -309,6 +346,7 @@ class main(ctk.CTk):
                 title="Error",
                 message=self.lang_dict[self.current_lang]["err_del"],
                 icon="cancel",
+                option_1=self.lang_dict[self.current_lang]["Ok"],
             )
 
     def fetch_product(self):
@@ -323,6 +361,7 @@ class main(ctk.CTk):
                 title=self.lang_dict[self.current_lang]["err"],
                 message=self.lang_dict[self.current_lang]["search_err"],
                 icon="cancel",
+                option_1=self.lang_dict[self.current_lang]["Ok"],
             )
             return
         if self.prev != "" and self.prev != prefix:
@@ -343,7 +382,10 @@ class main(ctk.CTk):
 
         self.curr_idx = 0
         msg.CTkMessagebox(
-            title="Error", message="Coudld Not Find The Product", icon="cancel"
+            title=self.lang_dict[self.current_lang]["err"],
+            message="Coudld Not Find The Product",
+            icon="cancel",
+            option_1=self.lang_dict[self.current_lang]["Ok"],
         )
 
         return None
