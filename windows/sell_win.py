@@ -29,11 +29,11 @@ class SellWin(ctk.CTkToplevel):
                 "No": "No",
                 "Done": "The Product has Sold",
                 "qua_err": "You Don't Have Enough Stock In Inventory!",
-                "stock": "Quantity Should more than 1",
+                "stock": "Quantity Should more than 0",
             },
             "ar": {
                 "error": "رقم تكون ان يجب الكمية",
-                "sell": "Sell",
+                "sell": "بيع",
                 "Price": "تكسب سوف :",
                 "confirm": "الكمية هذه بيع تريد أنك متأكد انت هل",
                 "qua": "كمية ادخل:",
@@ -45,7 +45,7 @@ class SellWin(ctk.CTkToplevel):
                 "No": "لا",
                 "Done": "المنتج بيع تم",
                 "qua_err": "المخزون في يكفي ما لديك ليس!",
-                "stock": "1 من اكثر تكون ان الكيمة يجب",
+                "stock": "0 من اكثر تكون ان الكيمة يجب",
             },
         }
 
@@ -60,6 +60,7 @@ class SellWin(ctk.CTkToplevel):
                 window_height=250,
             )
         )
+        self.title(self.dict_lan[lan]["sell"])
 
         self.quantity_entry = ctk.CTkEntry(self)
         self.quantity_entry.pack(pady=10)

@@ -41,6 +41,7 @@ class main(ctk.CTk):
         # Language dictionaries
         self.lang_dict = {
             "en": {
+                "Inventory Page": "Inventory Page",
                 "inbound": "Inbound",
                 "outbound": "Outbound",
                 "add_product": "Add Product",
@@ -65,8 +66,10 @@ class main(ctk.CTk):
                 "excel": "Create Excel File",
                 "search_err": "Search bar is Empty!",
                 "Ok": "Ok",
+                "empty": "Could  Not Find The Product",
             },
             "ar": {
+                "Inventory Page": "المخزن",
                 "inbound": "الوارد",
                 "outbound": "الصادر",
                 "add_product": "منتج إضافة",
@@ -82,7 +85,7 @@ class main(ctk.CTk):
                 "supplier": "المورد",
                 "delete": "حذف",
                 "err_del": "اختيار المنتج يرجى",
-                "del": "منتج المتاكد حذف تريد انك انت هل؟",
+                "del": " المنتج هذا حذف تريد انك متاكد انت هل؟",
                 "err": "خطأ",
                 "Yes": "نعم",
                 "No": "لا",
@@ -91,6 +94,7 @@ class main(ctk.CTk):
                 "excel": "Excel ملف أنشاء",
                 "search_err": "فارغ! البحث شريط",
                 "Ok": "حسناً",
+                "empty": "الاسم بهذا المنتج يوجد لا",
             },
         }
         self.frame_side = None
@@ -101,9 +105,10 @@ class main(ctk.CTk):
         self.product_service = ProductService(db_connection=Database().get_connection())
         self.prev = ""
         self.curr_idx = 0
+        self.title(self.lang_dict[self.current_lang]["Inventory Page"])
         self.products = []
         self.user = User()
-        # self.open_login()
+        self.open_login()
         self.fetch_product()
         self.mainloop()
 
@@ -114,14 +119,13 @@ class main(ctk.CTk):
 
     def fetch_user(self, login):
         self.user = login.user
-        print(self.user)
 
     def export_to_excel(self, filename="products.xlsx"):
         # Get data from the database
         df = self.product_service.fetch_all_datafram()
-        print(df)
-        directory_path = filedialog.askdirectory(title="Select a Directory")
-        df.to_excel(directory_path + "/products.xlsx", index=False)
+        directory_path = filedialog.askdirectory(title="")
+        if directory_path != "":
+            df.to_excel(directory_path + "/products.xlsx", index=False)
 
         # # Export the DataFrame to Excel
         # df.to_excel(filename, index=False)
@@ -202,13 +206,17 @@ class main(ctk.CTk):
     def open_create_user(self):
         if self.user.role != "admin":
             msg.CTkMessagebox(
-                title=self.lang_dict[self.current_lang]["err_del"],
+                title=self.lang_dict[self.current_lang]["err"],
                 message=self.lang_dict[self.current_lang]["per"],
                 option_1=self.lang_dict[self.current_lang]["Ok"],
                 icon="cancel",
             )
             return
-        UserForm(parent=self, lan=self.language_var.get()).grab_set()
+        UserForm(
+            parent=self,
+            lan=self.language_var.get(),
+            title=self.lang_dict[self.current_lang]["add_product"],
+        ).grab_set()
 
     def switch_language(self, *args):
         selected_language = self.language_var.get()
@@ -245,6 +253,7 @@ class main(ctk.CTk):
         self.treeview.heading(
             "Supplier", text=self.lang_dict[self.current_lang]["supplier"]
         )
+        self.title(self.lang_dict[self.current_lang]["Inventory Page"])
 
     def open_sell(self):
         try:
@@ -263,7 +272,6 @@ class main(ctk.CTk):
     def open_buy(self):
         try:
             item = self.treeview.selection()[0]
-            print()
             BuyWin(
                 self, self.current_lang, self.treeview.item(item, "values")[0]
             ).grab_set()
@@ -318,7 +326,7 @@ class main(ctk.CTk):
     def delete_product(self):
         if self.user.role != "admin":
             msg.CTkMessagebox(
-                title=self.lang_dict[self.current_lang]["err_del"],
+                title=self.lang_dict[self.current_lang]["err"],
                 message=self.lang_dict[self.current_lang]["per"],
                 icon="cancel",
                 option_1=self.lang_dict[self.current_lang]["Ok"],
@@ -343,7 +351,7 @@ class main(ctk.CTk):
 
         except IndexError as e:
             msg.CTkMessagebox(
-                title="Error",
+                title=self.lang_dict[self.current_lang]["err"],
                 message=self.lang_dict[self.current_lang]["err_del"],
                 icon="cancel",
                 option_1=self.lang_dict[self.current_lang]["Ok"],
@@ -383,7 +391,7 @@ class main(ctk.CTk):
         self.curr_idx = 0
         msg.CTkMessagebox(
             title=self.lang_dict[self.current_lang]["err"],
-            message="Coudld Not Find The Product",
+            message=self.lang_dict[self.current_lang]["empty"],
             icon="cancel",
             option_1=self.lang_dict[self.current_lang]["Ok"],
         )
@@ -391,7 +399,7 @@ class main(ctk.CTk):
         return None
 
     def open_add_product(self):
-        self.add_product = addProductWindow(parent=self)
+        self.add_product = addProductWindow(parent=self, lan=self.current_lang)
         self.add_product.grab_set()
 
     def update_treeview(self):

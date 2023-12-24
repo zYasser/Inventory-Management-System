@@ -10,7 +10,6 @@ import CTkMessagebox as msg
 class BuyWin(ctk.CTkToplevel):
     def __init__(self, master, lan, id):
         super().__init__(master)
-        self.title("Buy Window")
         self.master = master
         self.lan = lan
         self.id = id
@@ -28,11 +27,11 @@ class BuyWin(ctk.CTkToplevel):
                 "Yes": "Yes",
                 "No": "No",
                 "Done": "The Product has bought",
-                "stock": "Quantity Should more than 1",
+                "stock": "Quantity Should more than 0",
             },
             "ar": {
                 "error": "رقم تكون ان يجب الكمية",
-                "buy": "بيع",
+                "buy": "شراء",
                 "Price": "يكلفك سوا هذا",
                 "confirm": "الكمية هذه شراء تريد أنك متأكد انت هل",
                 "qua": "كمية ادخل:",
@@ -43,9 +42,10 @@ class BuyWin(ctk.CTkToplevel):
                 "Yes": "نعم",
                 "No": "لا",
                 "Done": "المنتج شراء تم",
-                "stock": "1 من اكثر تكون ان الكيمة يجب",
+                "stock": "0 من اكثر تكون ان الكيمة يجب",
             },
         }
+        self.title(self.dict_lan[lan]["buy"])
 
         # Add widgets to the window
         self.label = ctk.CTkLabel(self, text=self.dict_lan[lan]["qua"])

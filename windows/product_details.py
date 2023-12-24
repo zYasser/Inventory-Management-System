@@ -36,8 +36,6 @@ class ProductDetailsPopup(ctk.CTkToplevel):
             ],
         }
         self.resizable(False, False)
-        print(product_details)
-        print(type(product_details))
         i = 0
         for _, val in product_details.items():
             ctk.CTkLabel(self, text=self.lang_dict[lan][i] + ":").grid(

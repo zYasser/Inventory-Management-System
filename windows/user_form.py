@@ -9,9 +9,10 @@ import CTkMessagebox as msg
 
 
 class UserForm(ctk.CTkToplevel):
-    def __init__(self, parent, lan):
+    def __init__(self, parent, lan, title):
         super().__init__(parent)
-        self.title("User Form")
+
+        self.title(title)
         self.geometry(
             center_screen_geometry(
                 screen_width=self.winfo_screenwidth(),

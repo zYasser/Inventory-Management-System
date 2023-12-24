@@ -13,7 +13,6 @@ class LoginPage(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.title("Login Page")
         self.geometry(
             center_screen_geometry(
                 screen_width=self.winfo_screenwidth(),
@@ -34,7 +33,8 @@ class LoginPage(ctk.CTkToplevel):
                 "new_password": "New Password",
                 "submit": "Submit",
                 "user_exists": "User already exists!",
-                "login_failed": "Login failed!",
+                "login_failed": "Please Make Sure You Entered Username and Password Correctly!",
+                "error": "Error",
             },
             "ar": {
                 "welcome": "مرحبًا بك في صفحة الدخول",
@@ -47,14 +47,17 @@ class LoginPage(ctk.CTkToplevel):
                 "new_password": "كلمة المرور الجديدة",
                 "submit": "إرسال",
                 "user_exists": "المستخدم موجود بالفعل!",
-                "login_failed": "فشل تسجيل الدخول!",
+                "login_failed": "!صحيح بشكل السر كلمة المستخدم اسم ادخلت انك التحقق الرجاء",
+                "error": "Error",
             },
         }
+
         self.language_var = tk.StringVar()
         self.language_var.set("English")
         self.language_var.trace("w", self.switch_language)
 
         self.current_lang = "en"  # Default language
+        self.title(self.lang_dict[self.current_lang]["login"])
 
         self.user = None
         self.parent = parent
@@ -120,6 +123,7 @@ class LoginPage(ctk.CTkToplevel):
             placeholder_text=self.lang_dict[self.current_lang]["password"]
         )
         self.btn1.configure(text=self.lang_dict[self.current_lang]["login"])
+        self.title(self.lang_dict[self.current_lang]["login"])
 
     def login(self):
         username = self.userName.get()
@@ -128,9 +132,10 @@ class LoginPage(ctk.CTkToplevel):
         result = u.login(username=username, password=password)
         if result is None:
             msg.CTkMessagebox(
-                title="Error",
-                message="Please Check Your Username and Password",
+                title=self.lang_dict[self.current_lang]["error"],
+                message=self.lang_dict[self.current_lang]["login_failed"],
                 icon="cancel",
+                width=530,
             )
             return
 

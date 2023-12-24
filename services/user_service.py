@@ -115,9 +115,9 @@ SELECT u.* , r.role_name from User u left join Role r on u.role_id=r.role_id whe
         cursor = self.db_connection.cursor()
         cursor.execute(
             """
-SELECT u.* , r.role_name from User u left join Role r on u.role_id=r.role_id where u.username=?
+SELECT u.* , r.role_name from User u left join Role r on u.role_id=r.role_id where u.username=? and u.password=?
 """,
-            (username,),
+            (username,password),
         )
         result = cursor.fetchone()
         return User(*result) if result is not None else None
